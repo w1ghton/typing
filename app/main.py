@@ -1,42 +1,45 @@
-import typing
+from datetime import date
+from enum import Enum
+from json import dumps
+from uuid import UUID, uuid4
 
-Vector = typing.List[float]
-
-
-from datetime import datetime
-
-from pydantic import BaseModel, PositiveInt
+from pydantic import BaseModel, EmailStr, field_validator
 
 
-class User(BaseModel):
-    id: int
-    name: str = "John Doe"
-    signup_ts: datetime | None
-    tastes: dict[str, PositiveInt]
-    t: list[int]
+class Department(Enum):
+    HR = "HR"
+    SALES = "SALES"
+    IT = "IT"
+    ENGINEERING = "ENGINEERING"
 
 
-external_data = {
-    "id": 123,
-    "signup_ts": "2019-06-01 12:22",
-    "tastes": {
-        "wine": 9,
-        b"cheese": 7,
-        "cabbage": "1",
-    },
-    "t": [1, 2],
-}
+class Employee(BaseModel):
+    employee_id: UUID = uuid4()
+    name: str
+    email: EmailStr
+    date_of_birth: date
+    salary: float
+    department: Department
+    elected_benefits: bool
 
-user = User(**external_data)
+    @field_validator("salary")
+    def salary_must_be_small(value):
+        if value > 150000:
+            raise ValueError("Произошло раскулачивание")
+        return value
 
-print(user.id)
-# > 123
-print(user.model_dump())
-"""
-{
-    'id': 123,
-    'name': 'John Doe',
-    'signup_ts': datetime.datetime(2019, 6, 1, 12, 22),
-    'tastes': {'wine': 9, 'cheese': 7, 'cabbage': 1},
-}
-"""
+
+person = Employee(
+    employee_id=uuid4(),
+    name="John Doe",
+    email="a@pussy.cum",
+    date_of_birth="2001-05-20",
+    salary=100000,
+    department="HR",
+    elected_benefits=False,
+)
+
+# print(person.model_dump())
+# print()
+print(Employee.model_json_schema())
+print()
