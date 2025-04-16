@@ -1,2 +1,2 @@
 # typing
-typing library learning
+go away
