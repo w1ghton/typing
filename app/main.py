@@ -3,7 +3,7 @@ from enum import Enum
 from json import dumps
 from uuid import UUID, uuid4
 
-from pydantic import BaseModel, EmailStr, field_validator
+from pydantic import BaseModel, EmailStr, Field, field_validator
 
 
 class Department(Enum):
@@ -14,11 +14,11 @@ class Department(Enum):
 
 
 class Employee(BaseModel):
-    employee_id: UUID = uuid4()
-    name: str
+    employee_id: UUID = Field(default_factory=uuid4, frozen=True)
+    name: str = Field(min_length=2, max_length=32)
     email: EmailStr
     date_of_birth: date
-    salary: float
+    salary: float = Field(lt=200000, repr=False)
     department: Department
     elected_benefits: bool
 
@@ -30,7 +30,6 @@ class Employee(BaseModel):
 
 
 person = Employee(
-    employee_id=uuid4(),
     name="John Doe",
     email="a@pussy.cum",
     date_of_birth="2001-05-20",
@@ -40,6 +39,6 @@ person = Employee(
 )
 
 # print(person.model_dump())
+print(person)
+# print(Employee.model_json_schema())
 # print()
-print(Employee.model_json_schema())
-print()
